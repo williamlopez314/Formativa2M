@@ -3,155 +3,402 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aplicación con Control por Voz</title>
+  <title>Evaluación Formativa Guiada: Trigonometría</title>
+  <!-- KaTeX para renderizar fórmulas matemáticas -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+  
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 40px auto;
-      padding: 20px;
-      background-color: #f4f4f9;
-      color: #333;
+    :root {
+      --bg-dark: #0b1120;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --accent-blue: #0070f3;
+      --accent-cyan: #06b6d4;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
     }
-    .card {
-      background: white;
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
       padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      line-height: 1.5;
+    }
+
+    /* Top Navigation Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0f172a;
+      padding: 12px 24px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      border: 1px solid var(--card-border);
+    }
+    .badge {
+      background: #1e293b;
+      color: #38bdf8;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .header-info { font-size: 0.85rem; color: var(--text-muted); text-align: right; }
+    .header-actions { display: flex; gap: 10px; }
+
+    /* Timer / Phase Banner */
+    .timer-banner {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 30px;
       margin-bottom: 20px;
     }
-    .status {
-      font-weight: bold;
-      color: #007bff;
+    .timer-display {
+      font-size: 4rem;
+      font-weight: 800;
+      font-family: monospace;
+      color: #ffffff;
+      text-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+      letter-spacing: -2px;
     }
-    .btn {
-      background-color: #28a745;
+    .timer-label {
+      font-size: 0.75rem;
+      color: #38bdf8;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .phase-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #0284c7;
       color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 8px;
+    }
+    .status-dot { width: 8px; height: 8px; background: #f59e0b; border-radius: 50%; }
+    .phase-title { font-size: 1.8rem; font-weight: 700; margin-bottom: 6px; }
+
+    /* Main Grid Layout */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Formulas Grid */
+    .formulas-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .formula-box {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+    .formula-title {
+      font-size: 0.7rem;
+      color: #38bdf8;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* Checklist & Radio Options */
+    .checklist, .options-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+    .check-item, .option-item {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      padding: 14px 16px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
       cursor: pointer;
-      font-size: 14px;
-      margin: 5px 2px;
+      transition: all 0.2s;
     }
-    .btn:hover {
-      background-color: #218838;
+    .check-item:hover, .option-item:hover { border-color: #38bdf8; }
+
+    /* Buttons */
+    .btn {
+      background: #1e293b;
+      color: white;
+      border: 1px solid var(--card-border);
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s;
     }
-    .indicator {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
+    .btn-primary { background: #0284c7; border: none; }
+    .btn-primary:hover { background: #0369a1; }
+    
+    /* Mic Status Floating Bar */
+    .mic-bar {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(8px);
+      border: 1px solid #38bdf8;
+      padding: 10px 18px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      background: #22c55e;
       border-radius: 50%;
-      background-color: #dc3545;
-      margin-right: 8px;
-    }
-    .indicator.active {
-      background-color: #28a745;
+      box-shadow: 0 0 8px #22c55e;
     }
   </style>
 </head>
 <body>
 
-  <h1>Panel de Control por Voz</h1>
-  
-  <div class="card">
-    <p><span id="dot" class="indicator"></span><strong>Micrófono:</strong> <span id="mic-status">Desconectado</span></p>
-    <p><strong>Último comando oído:</strong> <i id="last-command">Ninguno</i></p>
+  <!-- Top Header -->
+  <header>
+    <div>
+      <span class="badge">2° Medio</span>
+      <span style="margin-left: 10px; font-weight: 600;">Colegio Pucará • Unidad Geometría</span>
+      <h2 style="font-size: 1.1rem; margin-top: 4px;">Evaluación Formativa Guiada: Trigonometría</h2>
+    </div>
+    <div style="display: flex; align-items: center; gap: 20px;">
+      <div class="header-info">
+        <div><strong>Docentes:</strong> William López & Yasmin Mardones</div>
+        <div><strong>Formato:</strong> Proyección Aula (40 Estudiantes)</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn">🔊 Sonido On</button>
+        <button class="btn">⛶ Proyectar Aula</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Timer & Phase Banner -->
+  <div class="timer-banner">
+    <div>
+      <div class="timer-label">Tiempo restante de la fase</div>
+      <div class="timer-display" id="timer">04:00</div>
+    </div>
+    <div>
+      <div class="phase-tag">
+        <span class="status-dot"></span> <span id="fase-label">FASE 1 DE 4</span> • En pausa
+      </div>
+      <h1 class="phase-title" id="fase-titulo">Metacognición Inicial - Preparándome para el Éxito</h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">Responder ANTES de iniciar la evaluación formativa (4 minutos).</p>
+    </div>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <button class="btn btn-primary" id="btn-reanudar" onclick="toggleTimer()">▶ Reanudar</button>
+      <button class="btn" onclick="addTime(1)">+1m</button>
+      <button class="btn" onclick="addTime(5)">+5m</button>
+      <button class="btn" onclick="resetTimer()">↺</button>
+      <button class="btn btn-primary" id="btn-siguiente" onclick="siguientePaso()">Siguiente ❯</button>
+    </div>
   </div>
 
-  <div class="card">
-    <p><strong>Temporizador:</strong> <span id="timer-status" class="status">Pausado (00:00)</span></p>
-    <p><strong>Fase actual:</strong> <span id="fase-status" class="status">Fase 1</span></p>
-    <p><strong>Sección actual:</strong> <span id="seccion-status" class="status">Sección A</span></p>
-    <p><strong>Pregunta actual:</strong> <span id="pregunta-status" class="status">Pregunta N° 1</span></p>
-    <p><strong>Problema actual:</strong> <span id="problema-status" class="status">Problema N° 1</span></p>
+  <!-- Main Grid Content -->
+  <div class="main-grid">
+    <!-- Left Column -->
+    <div class="card">
+      <div class="card-title">
+        <span>🌐</span> <span id="seccion-titulo">Parte I: Metacognición Inicial (4 minutos)</span>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Instrucciones y relaciones clave para responder antes de la prueba</p>
+
+      <div style="margin-top: 20px;">
+        <div style="font-size: 0.8rem; font-weight: 700; color: #38bdf8; letter-spacing: 0.5px;">✨ RAZONES TRIGONOMÉTRICAS ESENCIALES</div>
+        <div class="formulas-grid">
+          <div class="formula-box">
+            <div class="formula-title">Seno</div>
+            <div>$$\mathrm{sen}(\alpha) = \frac{\text{Cateto Opuesto}}{\text{Hipotrenusa}}$$</div>
+          </div>
+          <div class="formula-box">
+            <div class="formula-title">Coseno</div>
+            <div>$$\cos(\alpha) = \frac{\text{Cateto Adyacente}}{\text{Hipotenusa}}$$</div>
+          </div>
+          <div class="formula-box">
+            <div class="formula-title">Tangente</div>
+            <div>$$\tan(\alpha) = \frac{\text{Cateto Opuesto}}{\text{Cateto Adyacente}}$$</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <div style="font-size: 0.8rem; font-weight: 700; color: #38bdf8; letter-spacing: 0.5px;">📋 MI COMPROMISO ESTRATÉGICO (MARCA EN TU HOJA):</div>
+        <div class="checklist">
+          <label class="check-item"><input type="checkbox"> Leer detenidamente cada enunciado antes de responder.</label>
+          <label class="check-item"><input type="checkbox"> Dibujar un boceto/esquema claro en el desarrollo.</label>
+          <label class="check-item"><input type="checkbox"> Identificar explícitamente datos e incógnitas.</label>
+          <label class="check-item"><input type="checkbox"> Revisar cálculos y unidades ($m, cm, ^\circ$) antes de entregar.</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="card">
+      <div class="card-title">
+        <span>😊</span> Disposición Mental
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">Marca en tu hoja física la opción que mejor represente tu sensación actual:</p>
+      
+      <div class="options-list">
+        <label class="option-item"><input type="radio" name="mental"> Me siento preparado/a y confiado/a.</label>
+        <label class="option-item"><input type="radio" name="mental"> Siento algo de nerviosismo, pero sé que puedo.</label>
+        <label class="option-item"><input type="radio" name="mental"> Tengo dudas, pero daré mi mejor esfuerzo.</label>
+      </div>
+    </div>
   </div>
 
-  <div class="card">
-    <h3>Comandos directos (o habla por micrófono):</h3>
-    <button id="btn-reanudar" class="btn" onclick="reanudarTemporizador()">Reanudar temporizador</button>
-    <button id="btn-fase" class="btn" onclick="cambiarFase()">Cambiar de fase</button>
-    <button id="btn-seccion" class="btn" onclick="cambiarSeccion()">Cambiar de sección</button>
-    <button id="btn-pregunta" class="btn" onclick="siguientePregunta()">Siguiente pregunta</button>
-    <button id="btn-problema" class="btn" onclick="siguienteProblema()">Siguiente problema</button>
+  <!-- Voice Control Indicator floating bottom right -->
+  <div class="mic-bar">
+    <div class="pulse-dot"></div>
+    <div><strong>Voz activa:</strong> <span id="last-voice-cmd">Escuchando órdenes...</span></div>
   </div>
 
+  <!-- JavaScript Logic & Speech Recognition -->
   <script>
-    // Variables de estado
-    let faseContador = 1;
-    let seccionContador = 65; // Código ASCII para 'A'
-    let preguntaContador = 1;
-    let problemaContador = 1;
+    // App State Variables
+    let faseActual = 1;
+    let timerSeconds = 240;
+    let isRunning = false;
+    let timerInterval = null;
 
-    // Reconocimiento de Voz
+    const fases = [
+      { id: 1, label: "FASE 1 DE 4", titulo: "Metacognición Inicial - Preparándome para el Éxito", seccion: "Parte I: Metacognición Inicial (4 minutos)" },
+      { id: 2, label: "FASE 2 DE 4", titulo: "Desarrollo de Preguntas Guiadas", seccion: "Parte II: Preguntas de Aplicación Directa" },
+      { id: 3, label: "FASE 3 DE 4", titulo: "Resolución de Problemas Complejos", seccion: "Parte III: Problemas de Aplicación Trigonometría" },
+      { id: 4, label: "FASE 4 DE 4", titulo: "Cierre y Autoevaluación Final", seccion: "Parte IV: Reflexión y Entrega" }
+    ];
+
+    // Timer Functions
+    function updateTimerDisplay() {
+      const mins = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+      const secs = String(timerSeconds % 60).padStart(2, '0');
+      document.getElementById('timer').innerText = `${mins}:${secs}`;
+    }
+
+    function toggleTimer() {
+      const btn = document.getElementById('btn-reanudar');
+      if (isRunning) {
+        clearInterval(timerInterval);
+        isRunning = false;
+        btn.innerText = "▶ Reanudar";
+      } else {
+        isRunning = true;
+        btn.innerText = "⏸ Pausar";
+        timerInterval = setInterval(() => {
+          if (timerSeconds > 0) {
+            timerSeconds--;
+            updateTimerDisplay();
+          } else {
+            clearInterval(timerInterval);
+            isRunning = false;
+            btn.innerText = "▶ Reanudar";
+          }
+        }, 1000);
+      }
+    }
+
+    function addTime(mins) {
+      timerSeconds += mins * 60;
+      updateTimerDisplay();
+    }
+
+    function resetTimer() {
+      timerSeconds = 240;
+      updateTimerDisplay();
+    }
+
+    function siguientePaso() {
+      faseActual = (faseActual % fases.length) + 1;
+      const faseData = fases[faseActual - 1];
+      document.getElementById('fase-label').innerText = faseData.label;
+      document.getElementById('fase-titulo').innerText = faseData.titulo;
+      document.getElementById('seccion-titulo').innerText = faseData.seccion;
+    }
+
+    // --- Speech Recognition Integration ---
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    if (!SpeechRecognition) {
-      document.getElementById('mic-status').innerText = "Tu navegador no soporta reconocimiento de voz (usa Chrome o Edge).";
-    } else {
+    if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
       recognition.lang = 'es-ES';
       recognition.continuous = true;
       recognition.interimResults = false;
 
       const commands = {
-        "reanudar temporizador": () => reanudarTemporizador(),
-        "cambiar de fase": () => cambiarFase(),
-        "cambiar de sección": () => cambiarSeccion(),
-        "siguiente pregunta": () => siguientePregunta(),
-        "siguiente problema": () => siguienteProblema()
-      };
-
-      recognition.onstart = () => {
-        document.getElementById('mic-status').innerText = "Escuchando...";
-        document.getElementById('dot').classList.add('active');
+        "reanudar temporizador": () => toggleTimer(),
+        "reanudar": () => toggleTimer(),
+        "cambiar de fase": () => siguientePaso(),
+        "cambiar fase": () => siguientePaso(),
+        "cambiar de sección": () => siguientePaso(),
+        "cambiar sección": () => siguientePaso(),
+        "siguiente pregunta": () => siguientePaso(),
+        "siguiente problema": () => siguientePaso(),
+        "siguiente": () => siguientePaso()
       };
 
       recognition.onresult = (event) => {
-        const lastResultIndex = event.results.length - 1;
-        const transcript = event.results[lastResultIndex][0].transcript.trim().toLowerCase();
+        const lastIndex = event.results.length - 1;
+        const transcript = event.results[lastIndex][0].transcript.trim().toLowerCase();
         
-        document.getElementById('last-command').innerText = `"${transcript}"`;
+        document.getElementById('last-voice-cmd').innerText = `"${transcript}"`;
 
-        for (const [commandText, action] of Object.entries(commands)) {
-          if (transcript.includes(commandText)) {
+        for (const [cmd, action] of Object.entries(commands)) {
+          if (transcript.includes(cmd)) {
             action();
             break;
           }
         }
       };
 
-      recognition.onend = () => {
-        recognition.start();
-      };
-
+      recognition.onend = () => recognition.start();
       recognition.start();
-    }
-
-    // Funciones de control
-    function reanudarTemporizador() {
-      document.getElementById('timer-status').innerText = "En ejecución (Corriendo)";
-    }
-
-    function cambiarFase() {
-      faseContador++;
-      document.getElementById('fase-status').innerText = `Fase ${faseContador}`;
-    }
-
-    function cambiarSeccion() {
-      seccionContador++;
-      const letra = String.fromCharCode(seccionContador);
-      document.getElementById('seccion-status').innerText = `Sección ${letra}`;
-    }
-
-    function siguientePregunta() {
-      preguntaContador++;
-      document.getElementById('pregunta-status').innerText = `Pregunta N° ${preguntaContador}`;
-    }
-
-    function siguienteProblema() {
-      problemaContador++;
-      document.getElementById('problema-status').innerText = `Problema N° ${problemaContador}`;
+    } else {
+      document.getElementById('last-voice-cmd').innerText = "Voz no soportada en este navegador";
     }
   </script>
 </body>
