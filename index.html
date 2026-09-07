@@ -2,23 +2,94 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Mi Aplicación con Control por Voz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aplicación con Control por Voz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: #f4f4f9;
+      color: #333;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .status {
+      font-weight: bold;
+      color: #007bff;
+    }
+    .btn {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px 2px;
+    }
+    .btn:hover {
+      background-color: #218838;
+    }
+    .indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: #dc3545;
+      margin-right: 8px;
+    }
+    .indicator.active {
+      background-color: #28a745;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- AQUÍ VA EL CONTENIDO VISIBLE DE TU PÁGINA (Botones, textos, preguntas, etc.) -->
-  <h1>Mi Aplicación</h1>
+  <h1>Panel de Control por Voz</h1>
+  
+  <div class="card">
+    <p><span id="dot" class="indicator"></span><strong>Micrófono:</strong> <span id="mic-status">Desconectado</span></p>
+    <p><strong>Último comando oído:</strong> <i id="last-command">Ninguno</i></p>
+  </div>
 
+  <div class="card">
+    <p><strong>Temporizador:</strong> <span id="timer-status" class="status">Pausado (00:00)</span></p>
+    <p><strong>Fase actual:</strong> <span id="fase-status" class="status">Fase 1</span></p>
+    <p><strong>Sección actual:</strong> <span id="seccion-status" class="status">Sección A</span></p>
+    <p><strong>Pregunta actual:</strong> <span id="pregunta-status" class="status">Pregunta N° 1</span></p>
+    <p><strong>Problema actual:</strong> <span id="problema-status" class="status">Problema N° 1</span></p>
+  </div>
 
-  <!-- CÓDIGO DE CONTROL POR VOZ -->
+  <div class="card">
+    <h3>Comandos directos (o habla por micrófono):</h3>
+    <button id="btn-reanudar" class="btn" onclick="reanudarTemporizador()">Reanudar temporizador</button>
+    <button id="btn-fase" class="btn" onclick="cambiarFase()">Cambiar de fase</button>
+    <button id="btn-seccion" class="btn" onclick="cambiarSeccion()">Cambiar de sección</button>
+    <button id="btn-pregunta" class="btn" onclick="siguientePregunta()">Siguiente pregunta</button>
+    <button id="btn-problema" class="btn" onclick="siguienteProblema()">Siguiente problema</button>
+  </div>
+
   <script>
+    // Variables de estado
+    let faseContador = 1;
+    let seccionContador = 65; // Código ASCII para 'A'
+    let preguntaContador = 1;
+    let problemaContador = 1;
+
+    // Reconocimiento de Voz
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      alert("Tu navegador no soporta el reconocimiento de voz. Usa Google Chrome o Edge.");
+      document.getElementById('mic-status').innerText = "Tu navegador no soporta reconocimiento de voz (usa Chrome o Edge).";
     } else {
       const recognition = new SpeechRecognition();
-      
       recognition.lang = 'es-ES';
       recognition.continuous = true;
       recognition.interimResults = false;
@@ -31,11 +102,16 @@
         "siguiente problema": () => siguienteProblema()
       };
 
+      recognition.onstart = () => {
+        document.getElementById('mic-status').innerText = "Escuchando...";
+        document.getElementById('dot').classList.add('active');
+      };
+
       recognition.onresult = (event) => {
         const lastResultIndex = event.results.length - 1;
         const transcript = event.results[lastResultIndex][0].transcript.trim().toLowerCase();
         
-        console.log("Dijiste: " + transcript);
+        document.getElementById('last-command').innerText = `"${transcript}"`;
 
         for (const [commandText, action] of Object.entries(commands)) {
           if (transcript.includes(commandText)) {
@@ -52,25 +128,30 @@
       recognition.start();
     }
 
-    // --- AQUÍ CONECTAS TUS ACCIONES ---
+    // Funciones de control
     function reanudarTemporizador() {
-      // Escribe aquí lo que hace tu temporizador al reanudar
+      document.getElementById('timer-status').innerText = "En ejecución (Corriendo)";
     }
 
     function cambiarFase() {
-      // Escribe aquí la acción para cambiar de fase
+      faseContador++;
+      document.getElementById('fase-status').innerText = `Fase ${faseContador}`;
     }
 
     function cambiarSeccion() {
-      // Escribe aquí la acción para cambiar de sección
+      seccionContador++;
+      const letra = String.fromCharCode(seccionContador);
+      document.getElementById('seccion-status').innerText = `Sección ${letra}`;
     }
 
     function siguientePregunta() {
-      // Escribe aquí la acción para ir a la siguiente pregunta
+      preguntaContador++;
+      document.getElementById('pregunta-status').innerText = `Pregunta N° ${preguntaContador}`;
     }
 
     function siguienteProblema() {
-      // Escribe aquí la acción para ir al siguiente problema
+      problemaContador++;
+      document.getElementById('problema-status').innerText = `Problema N° ${problemaContador}`;
     }
   </script>
 </body>
